@@ -6,7 +6,7 @@
  * and AppData playlist synchronization.
  */
 
-import { AudioTrack, DriveFolder, Playlist, ImageFormat, UserPreferences } from '../types';
+import { AudioTrack, DriveFolder, Playlist, ImageFormat, UserPreferences, SyncProgressState } from '../types';
 import { authService } from './authService';
 import { dbService } from './dbService';
 import { fetchWithDriveBackoff } from './driveBackoff';
@@ -58,6 +58,50 @@ export class DriveService {
   private cachedMusicRootFolder: DriveFolder | null = null;
   private cachedMimusicaStructure: MimusicaStructure | null = null;
   private folderDetailsCache: Map<string, { id: string; name: string; parentId?: string; path: string }> = new Map();
+
+  private syncState: SyncProgressState = {
+    isSyncing: false,
+    percent: 0,
+    step: '',
+    currentFile: 0,
+    totalFiles: 0,
+    stage: 'idle',
+    completedSummary: null,
+    error: null
+  };
+  private syncListeners: Set<(state: SyncProgressState) => void> = new Set();
+  private activeSyncPromise: Promise<MimusicaStructure> | null = null;
+
+  public getSyncState(): SyncProgressState {
+    return { ...this.syncState };
+  }
+
+  public subscribeSyncProgress(listener: (state: SyncProgressState) => void): () => void {
+    this.syncListeners.add(listener);
+    listener({ ...this.syncState });
+    return () => {
+      this.syncListeners.delete(listener);
+    };
+  }
+
+  public clearCompletedSummary() {
+    this.syncState = {
+      ...this.syncState,
+      completedSummary: null,
+      error: null
+    };
+    this.syncListeners.forEach((fn) => {
+      try { fn(this.syncState); } catch {}
+    });
+  }
+
+  public updateSyncState(partial: Partial<SyncProgressState>, onProgress?: (p: SyncProgressState) => void) {
+    this.syncState = { ...this.syncState, ...partial };
+    onProgress?.(this.syncState);
+    this.syncListeners.forEach((fn) => {
+      try { fn(this.syncState); } catch (err) { console.error('Sync listener error:', err); }
+    });
+  }
 
   public clearRootCache() {
     this.cachedMusicRootFolder = null;
@@ -312,14 +356,36 @@ export class DriveService {
    */
   async getMimusicaStructure(
     forceRefresh: boolean = false,
-    onProgress?: (progress: { percent: number; step: string }) => void
+    onProgress?: (progress: SyncProgressState) => void
   ): Promise<MimusicaStructure> {
     if (!forceRefresh && this.cachedMimusicaStructure) {
       return this.cachedMimusicaStructure;
     }
 
+    if (this.activeSyncPromise) {
+      return this.activeSyncPromise;
+    }
+
+    this.activeSyncPromise = this.performMimusicaSync(forceRefresh, onProgress);
+    try {
+      return await this.activeSyncPromise;
+    } finally {
+      this.activeSyncPromise = null;
+    }
+  }
+
+  private async performMimusicaSync(
+    forceRefresh: boolean,
+    onProgress?: (progress: SyncProgressState) => void
+  ): Promise<MimusicaStructure> {
     const token = authService.getAccessToken();
     if (!token) {
+      this.updateSyncState({
+        isSyncing: false,
+        percent: 0,
+        step: 'No hay sesión activa en Google Drive',
+        stage: 'idle'
+      }, onProgress);
       return {
         exists: false,
         rootFolder: null,
@@ -330,82 +396,150 @@ export class DriveService {
       };
     }
 
-    onProgress?.({ percent: 15, step: 'Buscando carpeta /mimusica en Google Drive...' });
-    const rootFolder = await this.getMusicRootFolder(forceRefresh);
-    if (!rootFolder) {
-      this.cachedMimusicaStructure = {
-        exists: false,
-        rootFolder: null,
-        subfolders: [],
-        allTracks: [],
-        rootOnlyTracks: [],
-        tracksByFolderId: {}
-      };
-      return this.cachedMimusicaStructure;
-    }
+    try {
+      this.updateSyncState({
+        isSyncing: true,
+        percent: 5,
+        step: 'Conectando con Google Drive...',
+        stage: 'searching_folder',
+        currentFile: 0,
+        totalFiles: 0,
+        currentFileName: undefined,
+        completedSummary: null,
+        error: null
+      }, onProgress);
 
-    onProgress?.({ percent: 30, step: 'Explorando subcarpetas de /mimusica...' });
-    // 1. Get direct subfolders
-    const directSubfolders = await this.listFolders(rootFolder.id);
+      this.updateSyncState({
+        percent: 15,
+        step: 'Buscando carpeta /mimusica en tu Google Drive...',
+        stage: 'searching_folder'
+      }, onProgress);
 
-    onProgress?.({ percent: 45, step: 'Leyendo canciones en /mimusica...' });
-    // 2. Get all audio files in /mimusica and all its descendants
-    const allTracks = await this.listAudioFiles(undefined, undefined, onProgress);
+      const rootFolder = await this.getMusicRootFolder(forceRefresh);
+      if (!rootFolder) {
+        this.cachedMimusicaStructure = {
+          exists: false,
+          rootFolder: null,
+          subfolders: [],
+          allTracks: [],
+          rootOnlyTracks: [],
+          tracksByFolderId: {}
+        };
+        this.updateSyncState({
+          isSyncing: false,
+          percent: 100,
+          step: 'Carpeta /mimusica no encontrada en Google Drive',
+          stage: 'error',
+          error: 'Carpeta /mimusica no encontrada'
+        }, onProgress);
+        return this.cachedMimusicaStructure;
+      }
 
-    // 3. Organize tracks by folder
-    const tracksByFolderId: Record<string, AudioTrack[]> = {};
-    tracksByFolderId[rootFolder.id] = [];
+      this.updateSyncState({
+        percent: 25,
+        step: 'Explorando subcarpetas y estructura de álbumes...',
+        stage: 'discovering_subfolders'
+      }, onProgress);
 
-    for (const sub of directSubfolders) {
-      tracksByFolderId[sub.id] = [];
-    }
+      // 1. Get direct subfolders
+      const directSubfolders = await this.listFolders(rootFolder.id);
 
-    const rootOnlyTracks: AudioTrack[] = [];
+      this.updateSyncState({
+        percent: 35,
+        step: `Analizando pistas en ${directSubfolders.length > 0 ? `${directSubfolders.length} subdirectorios` : 'la raíz'}...`,
+        stage: 'scanning_files'
+      }, onProgress);
 
-    for (const track of allTracks) {
-      const parentId = track.folderId;
-      if (parentId && tracksByFolderId[parentId]) {
-        tracksByFolderId[parentId].push(track);
-      } else {
-        // Match by folder path or album name if parentId doesn't match directly
-        let matchedSub = false;
-        for (const sub of directSubfolders) {
-          const subLower = sub.name.toLowerCase();
-          if (
-            track.folderPath?.toLowerCase().includes(`/${subLower}`) ||
-            track.album?.toLowerCase() === subLower
-          ) {
-            tracksByFolderId[sub.id].push(track);
-            matchedSub = true;
-            break;
+      // 2. Get all audio files in /mimusica and all its descendants with detailed live progression
+      const allTracks = await this.listAudioFiles(undefined, undefined, (p) => {
+        this.updateSyncState(p, onProgress);
+      });
+
+      // 3. Organize tracks by folder
+      const tracksByFolderId: Record<string, AudioTrack[]> = {};
+      tracksByFolderId[rootFolder.id] = [];
+
+      for (const sub of directSubfolders) {
+        tracksByFolderId[sub.id] = [];
+      }
+
+      const rootOnlyTracks: AudioTrack[] = [];
+
+      for (const track of allTracks) {
+        const parentId = track.folderId;
+        if (parentId && tracksByFolderId[parentId]) {
+          tracksByFolderId[parentId].push(track);
+        } else {
+          // Match by folder path or album name if parentId doesn't match directly
+          let matchedSub = false;
+          for (const sub of directSubfolders) {
+            const subLower = sub.name.toLowerCase();
+            if (
+              track.folderPath?.toLowerCase().includes(`/${subLower}`) ||
+              track.album?.toLowerCase() === subLower
+            ) {
+              tracksByFolderId[sub.id].push(track);
+              matchedSub = true;
+              break;
+            }
+          }
+          if (!matchedSub) {
+            tracksByFolderId[rootFolder.id].push(track);
           }
         }
-        if (!matchedSub) {
-          tracksByFolderId[rootFolder.id].push(track);
+
+        if (track.folderId === rootFolder.id || track.folderPath === `/${rootFolder.name}`) {
+          rootOnlyTracks.push(track);
         }
       }
 
-      if (track.folderId === rootFolder.id || track.folderPath === `/${rootFolder.name}`) {
-        rootOnlyTracks.push(track);
+      const subfoldersWithCounts = directSubfolders.map((folder) => ({
+        folder,
+        trackCount: tracksByFolderId[folder.id]?.length || 0
+      }));
+
+      // Cache direct subfolders in IndexedDB
+      if (directSubfolders.length > 0) {
+        await dbService.saveFolders(directSubfolders).catch(() => {});
       }
+
+      const result: MimusicaStructure = {
+        exists: true,
+        rootFolder,
+        subfolders: subfoldersWithCounts,
+        allTracks,
+        rootOnlyTracks,
+        tracksByFolderId
+      };
+
+      this.cachedMimusicaStructure = result;
+
+      this.updateSyncState({
+        isSyncing: false,
+        percent: 100,
+        step: `¡Sincronización finalizada! ${allTracks.length} canciones cargadas en ${directSubfolders.length} álbumes.`,
+        stage: 'completed',
+        currentFile: allTracks.length,
+        totalFiles: allTracks.length,
+        completedSummary: {
+          totalTracks: allTracks.length,
+          totalFolders: directSubfolders.length,
+          timestamp: Date.now()
+        },
+        error: null
+      }, onProgress);
+
+      return result;
+    } catch (err: any) {
+      this.updateSyncState({
+        isSyncing: false,
+        percent: 0,
+        step: err?.message || 'Error en la sincronización',
+        stage: 'error',
+        error: err?.message || 'Error en la sincronización'
+      }, onProgress);
+      throw err;
     }
-
-    const subfoldersWithCounts = directSubfolders.map((folder) => ({
-      folder,
-      trackCount: tracksByFolderId[folder.id]?.length || 0
-    }));
-
-    const result: MimusicaStructure = {
-      exists: true,
-      rootFolder,
-      subfolders: subfoldersWithCounts,
-      allTracks,
-      rootOnlyTracks,
-      tracksByFolderId
-    };
-
-    this.cachedMimusicaStructure = result;
-    return result;
   }
 
   /**
@@ -478,18 +612,32 @@ export class DriveService {
   async listAudioFiles(
     folderId?: string,
     searchFilter?: string,
-    onProgress?: (progress: { percent: number; step: string }) => void
+    onProgress?: (progress: SyncProgressState) => void
   ): Promise<AudioTrack[]> {
     const token = authService.getAccessToken();
     if (!token) throw new Error('Usuario no autenticado en Google Drive');
 
-    onProgress?.({ percent: 20, step: 'Localizando carpeta /mimusica...' });
+    onProgress?.({
+      isSyncing: true,
+      percent: 20,
+      step: 'Localizando carpeta /mimusica en Google Drive...',
+      stage: 'searching_folder',
+      currentFile: 0,
+      totalFiles: 0
+    });
     const musicRoot = await this.getMusicRootFolder(false);
     if (!musicRoot) {
       return [];
     }
 
-    onProgress?.({ percent: 35, step: 'Explorando subcarpetas de música...' });
+    onProgress?.({
+      isSyncing: true,
+      percent: 30,
+      step: 'Explorando subcarpetas y jerarquía de álbumes...',
+      stage: 'discovering_subfolders',
+      currentFile: 0,
+      totalFiles: 0
+    });
     // Discover full folder hierarchy
     const hierarchy = await this.getAllSubfoldersHierarchy(musicRoot);
 
@@ -504,7 +652,14 @@ export class DriveService {
 
     if (targetFolderIds.length === 0) return [];
 
-    onProgress?.({ percent: 50, step: `Buscando pistas de audio en ${targetFolderIds.length} carpeta(s)...` });
+    onProgress?.({
+      isSyncing: true,
+      percent: 40,
+      step: `Buscando canciones en ${targetFolderIds.length} carpeta(s)...`,
+      stage: 'scanning_files',
+      currentFile: 0,
+      totalFiles: 0
+    });
 
     const chunkSize = 10;
     const allFiles: any[] = [];
@@ -513,10 +668,14 @@ export class DriveService {
       const batchIds = targetFolderIds.slice(i, i + chunkSize);
       const parentFilter = batchIds.map((id) => `'${id}' in parents`).join(' or ');
 
-      const batchProgressPercent = Math.min(80, Math.round(50 + ((i + 1) / targetFolderIds.length) * 30));
+      const batchProgressPercent = Math.min(50, Math.round(40 + ((i + 1) / targetFolderIds.length) * 10));
       onProgress?.({
+        isSyncing: true,
         percent: batchProgressPercent,
-        step: `Leyendo archivos de audio (${allFiles.length} canciones encontradas)...`
+        step: `Escaneando archivos en la nube (${allFiles.length} archivos detectados)...`,
+        stage: 'scanning_files',
+        currentFile: allFiles.length,
+        totalFiles: 0
       });
 
       // Query all non-folder files within these parent folders
@@ -582,18 +741,42 @@ export class DriveService {
       return true;
     });
 
+    const totalFiles = validAudioFiles.length;
+
+    if (totalFiles === 0) {
+      onProgress?.({
+        isSyncing: true,
+        percent: 90,
+        step: 'No se encontraron archivos de audio en /mimusica.',
+        stage: 'scanning_files',
+        currentFile: 0,
+        totalFiles: 0
+      });
+      return [];
+    }
+
+    onProgress?.({
+      isSyncing: true,
+      percent: 52,
+      step: `Identificadas ${totalFiles} canciones. Descargando carátulas de álbumes...`,
+      stage: 'processing_tracks',
+      currentFile: 0,
+      totalFiles
+    });
+
     // Resolve artwork for parents of the found tracks
     const uniqueParentIds = Array.from(new Set(validAudioFiles.map((f: any) => f.parents?.[0]).filter(Boolean))) as string[];
-    if (uniqueParentIds.length > 0) {
-      onProgress?.({ percent: 85, step: 'Recuperando carátulas e información de álbumes...' });
-    }
     for (const parentId of uniqueParentIds) {
       if (!this.folderArtworkCache.has(parentId)) {
         await this.discoverFolderArtwork(parentId).catch(() => {});
       }
     }
 
-    const tracks: AudioTrack[] = validAudioFiles.map((file: any) => {
+    const tracks: AudioTrack[] = [];
+
+    // Progressive processing file-by-file with exact counting and responsive rendering ticks
+    for (let i = 0; i < totalFiles; i++) {
+      const file = validAudioFiles[i];
       const parentFolderId = file.parents?.[0] || musicRoot.id;
       const folderInfo = hierarchy.get(parentFolderId) || this.folderDetailsCache.get(parentFolderId);
       const folderName = folderInfo ? folderInfo.name : 'mimusica';
@@ -619,7 +802,7 @@ export class DriveService {
       const durationMillis = file.videoMediaMetadata?.durationMillis ? parseInt(file.videoMediaMetadata.durationMillis, 10) : 0;
       const parsedDurationSec = durationMillis > 0 ? Math.round(durationMillis / 1000) : 0;
 
-      return {
+      tracks.push({
         id: `drive_${file.id}`,
         driveFileId: file.id,
         name: file.name,
@@ -635,16 +818,53 @@ export class DriveService {
         folderPath: folderPath,
         source: 'drive',
         addedAt: new Date(file.modifiedTime).getTime() || Date.now()
-      };
+      });
+
+      const fileNumber = i + 1;
+      const pct = Math.min(94, Math.round(55 + (fileNumber / totalFiles) * 38));
+
+      // Emit live progressive feedback with counter: e.g. "Archivo 12 de 48"
+      if (totalFiles <= 50 || fileNumber % 2 === 0 || fileNumber === totalFiles) {
+        onProgress?.({
+          isSyncing: true,
+          percent: pct,
+          step: `Procesando canción ${fileNumber} de ${totalFiles}: ${file.name}`,
+          stage: 'processing_tracks',
+          currentFile: fileNumber,
+          totalFiles,
+          currentFileName: file.name
+        });
+
+        // Small yield so user sees the progress bar advance smoothly
+        if (totalFiles > 10 && fileNumber % 8 === 0) {
+          await new Promise((r) => setTimeout(r, 4));
+        }
+      }
+    }
+
+    onProgress?.({
+      isSyncing: true,
+      percent: 96,
+      step: `Guardando ${tracks.length} canciones en la memoria local del reproductor...`,
+      stage: 'saving_local',
+      currentFile: tracks.length,
+      totalFiles: tracks.length
     });
 
-    onProgress?.({ percent: 95, step: 'Indexando biblioteca en almacenamiento local...' });
     // Save to IndexedDB cache
     if (tracks.length > 0) {
       await dbService.saveTracks(tracks).catch(() => {});
     }
 
-    onProgress?.({ percent: 100, step: `¡Sincronización completada! ${tracks.length} canciones encontradas.` });
+    onProgress?.({
+      isSyncing: true,
+      percent: 99,
+      step: `Organizando biblioteca...`,
+      stage: 'saving_local',
+      currentFile: tracks.length,
+      totalFiles: tracks.length
+    });
+
     return tracks;
   }
 

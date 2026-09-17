@@ -27,9 +27,10 @@ import {
   AlertCircle,
   FolderOpen,
   Coffee,
-  ShieldCheck
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
-import { PlayerState, AudioTrack, DriveFolder, DriveAuthUser } from '../types';
+import { PlayerState, AudioTrack, DriveFolder, DriveAuthUser, SyncProgressState } from '../types';
 import { audioEngine } from '../services/audioEngine';
 import { authService } from '../services/authService';
 import { dbService } from '../services/dbService';
@@ -39,6 +40,7 @@ import { DEMO_TRACKS } from '../data/demoTracks';
 import { EclipseNeonBorder } from './EclipseNeonBorder';
 import { CoffeeModal } from './CoffeeModal';
 import { PrivacyModal } from './PrivacyModal';
+import { SyncProgressModal } from './SyncProgressModal';
 
 interface SphericalPlayerProps {
   playerState: PlayerState;
@@ -73,6 +75,8 @@ export function SphericalPlayer({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubTime, setScrubTime] = useState<number | null>(null);
   const [syncStatusText, setSyncStatusText] = useState<string>('');
+  const [syncState, setSyncState] = useState<SyncProgressState>(() => driveService.getSyncState());
+  const [showSyncModal, setShowSyncModal] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showCoffeeModal, setShowCoffeeModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -82,6 +86,30 @@ export function SphericalPlayer({
     const unsubscribe = subscribeWeather((w) => setLocalWeather(w));
     return unsubscribe;
   }, []);
+
+  // Listen to granular synchronization events from driveService
+  useEffect(() => {
+    const unsubscribeSync = driveService.subscribeSyncProgress((state) => {
+      setSyncState(state);
+      if (state.isSyncing) {
+        setIsLoadingDrive(true);
+        setShowSyncModal(true);
+        setSyncStatusText(state.step);
+      } else {
+        setIsLoadingDrive(false);
+        if (state.stage === 'completed' || state.completedSummary) {
+          setShowSyncModal(true);
+          const totalCount = state.completedSummary?.totalTracks ?? state.totalFiles ?? state.currentFile;
+          setSyncStatusText(`¡Sincronización completada! ${totalCount} canciones.`);
+          setTimeout(() => setSyncStatusText(''), 6000);
+        } else if (state.stage === 'error') {
+          setSyncStatusText(state.error || 'Error en la sincronización');
+          setTimeout(() => setSyncStatusText(''), 6000);
+        }
+      }
+    });
+    return unsubscribeSync;
+  }, [setIsLoadingDrive]);
 
   const sphereRef = useRef<HTMLDivElement>(null);
   const currentTrack = playerState.queue[playerState.currentTrackIndex] || null;
@@ -217,17 +245,14 @@ export function SphericalPlayer({
   const loadMimusicaData = async (forceRefresh: boolean = false) => {
     if (!authService.getAccessToken()) return;
     try {
+      setShowSyncModal(true);
       setIsLoadingDrive(true);
-      setSyncStatusText(forceRefresh ? 'Actualizando /mimusica...' : 'Consultando /mimusica...');
-      const structure = await driveService.getMimusicaStructure(forceRefresh, (prog) => {
-        setSyncStatusText(prog.step);
-      });
+      const structure = await driveService.getMimusicaStructure(forceRefresh);
 
       setMimusicaStructure(structure);
 
       if (!structure.exists) {
         setMimusicaNotFound(true);
-        setSyncStatusText('Carpeta /mimusica no encontrada en Google Drive');
         setInnerView('mimusica_selector');
       } else {
         setMimusicaNotFound(false);
@@ -243,16 +268,10 @@ export function SphericalPlayer({
             audioEngine.setQueue(structure.allTracks, 0, false);
             setActiveFolderMode({ type: 'all', name: 'Toda /mimusica' });
           }
-          setSyncStatusText(`¡${structure.allTracks.length} canciones cargadas desde /mimusica!`);
-        } else {
-          setSyncStatusText('La carpeta /mimusica está vacía');
         }
       }
-      setTimeout(() => setSyncStatusText(''), 3500);
     } catch (e: any) {
       console.warn('Error loading /mimusica:', e);
-      setSyncStatusText(e?.message || 'Error al leer /mimusica');
-      setTimeout(() => setSyncStatusText(''), 4000);
     } finally {
       setIsLoadingDrive(false);
     }
@@ -500,7 +519,21 @@ export function SphericalPlayer({
               )}
 
               {/* Status Notice or Audio Format Badge */}
-              {syncStatusText ? (
+              {syncState.isSyncing ? (
+                <button
+                  id="btn-sync-glanceable-pill"
+                  onClick={() => setShowSyncModal(true)}
+                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-400/50 text-[11px] font-mono text-cyan-200 animate-pulse tracking-wide max-w-[280px] truncate shadow-[0_0_12px_rgba(6,182,212,0.35)] cursor-pointer"
+                  title="Toca para ver el progreso detallado de la sincronización"
+                >
+                  <RefreshCw className="w-3 h-3 animate-spin text-cyan-400 shrink-0" />
+                  <span className="truncate">
+                    {syncState.totalFiles > 0
+                      ? `${syncState.percent}% (${syncState.currentFile}/${syncState.totalFiles})`
+                      : `${syncState.percent}% Sincronizando...`}
+                  </span>
+                </button>
+              ) : syncStatusText ? (
                 <div className="text-[11px] sm:text-xs font-mono text-cyan-300 animate-pulse tracking-wide truncate max-w-[280px]">
                   {syncStatusText}
                 </div>
@@ -927,25 +960,85 @@ export function SphericalPlayer({
                   </div>
 
                   <div className="w-full max-w-[260px] space-y-2.5 pt-2">
-                    {/* Explore /mimusica Button */}
-                    <button
-                      onClick={() => setInnerView('mimusica_selector')}
-                      disabled={isLoadingDrive}
-                      className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-full bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-xs sm:text-sm font-bold text-white transition-all shadow-md min-h-[46px]"
-                    >
-                      <Folder className="w-4 h-4" />
-                      <span>Explorar /mimusica</span>
-                    </button>
+                    {/* Live Progress Card when syncing */}
+                    {syncState.isSyncing ? (
+                      <div className="w-full bg-cyan-950/90 border border-cyan-400/50 rounded-2xl p-3 text-left space-y-2 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                            Sincronizando...
+                          </span>
+                          <span className="text-xs font-mono font-extrabold text-cyan-300">
+                            {syncState.percent}%
+                          </span>
+                        </div>
 
-                    {/* Sync /mimusica Button */}
-                    <button
-                      onClick={() => loadMimusicaData(true)}
-                      disabled={isLoadingDrive}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-xs sm:text-sm text-cyan-200 transition-all min-h-[44px]"
-                    >
-                      <RefreshCw className={`w-4 h-4 ${isLoadingDrive ? 'animate-spin' : ''}`} />
-                      <span>Sincronizar /mimusica</span>
-                    </button>
+                        {/* Progress Bar */}
+                        <div className="w-full h-2 bg-slate-900 rounded-full border border-cyan-500/30 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 transition-all duration-200 shadow-sm"
+                            style={{ width: `${Math.max(5, syncState.percent)}%` }}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] font-mono text-cyan-200/90">
+                          <span className="truncate pr-1">
+                            {syncState.totalFiles > 0 
+                              ? `Canción ${syncState.currentFile} de ${syncState.totalFiles}`
+                              : syncState.currentFile > 0 
+                              ? `${syncState.currentFile} canciones`
+                              : 'Escaneando archivos...'}
+                          </span>
+                          <button
+                            onClick={() => setShowSyncModal(true)}
+                            className="text-[10px] text-cyan-400 hover:text-white underline font-semibold shrink-0"
+                          >
+                            Ver detalle
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Explore /mimusica Button */}
+                        <button
+                          onClick={() => setInnerView('mimusica_selector')}
+                          disabled={isLoadingDrive}
+                          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-full bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-xs sm:text-sm font-bold text-white transition-all shadow-md min-h-[46px]"
+                        >
+                          <Folder className="w-4 h-4" />
+                          <span>Explorar /mimusica</span>
+                        </button>
+
+                        {/* Sync /mimusica Button */}
+                        <button
+                          id="btn-sync-drive-menu"
+                          onClick={() => loadMimusicaData(true)}
+                          disabled={isLoadingDrive}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-xs sm:text-sm text-cyan-200 transition-all min-h-[44px]"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          <span>Sincronizar /mimusica</span>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Completion Alert notice if recently completed */}
+                    {syncState.completedSummary && !syncState.isSyncing && (
+                      <div className="w-full bg-emerald-950/70 border border-emerald-400/40 rounded-xl p-2.5 flex items-center justify-between text-left">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span className="text-[11px] text-emerald-200 truncate">
+                            ¡Sincronizado! <strong>{syncState.completedSummary.totalTracks}</strong> pistas
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => setShowSyncModal(true)}
+                          className="text-[10px] font-bold text-emerald-300 hover:text-white underline px-1 shrink-0"
+                        >
+                          Resumen
+                        </button>
+                      </div>
+                    )}
 
                     {/* Disconnect Button */}
                     <button
@@ -1062,9 +1155,27 @@ export function SphericalPlayer({
             {/* Main Content inside Sphere */}
             <div className="flex-1 overflow-y-auto my-3 space-y-3 pr-1 scrollbar-thin scrollbar-thumb-cyan-500/40">
               {isLoadingDrive ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3 text-cyan-300">
-                  <Loader2 className="w-8 h-8 animate-spin" />
-                  <p className="text-xs text-center font-mono">{syncStatusText || 'Leyendo /mimusica...'}</p>
+                <div className="h-full flex flex-col items-center justify-center gap-3 text-cyan-300 p-4 text-center">
+                  <div className="relative w-14 h-14 rounded-full bg-cyan-500/20 border-2 border-cyan-400/60 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                    <RefreshCw className="w-7 h-7 animate-spin text-cyan-300" />
+                  </div>
+                  <div className="space-y-1.5 w-full max-w-[240px]">
+                    <div className="flex justify-between items-center text-xs font-mono">
+                      <span className="text-cyan-300/80 font-medium">Sincronizando</span>
+                      <span className="font-extrabold text-white">{syncState.percent}%</span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-900 rounded-full border border-cyan-500/40 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 transition-all duration-200 shadow-sm"
+                        style={{ width: `${Math.max(4, syncState.percent)}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] font-mono text-cyan-200 pt-1 truncate">
+                      {syncState.totalFiles > 0
+                        ? `Canción ${syncState.currentFile} de ${syncState.totalFiles}`
+                        : syncState.step || 'Sincronizando pistas...'}
+                    </p>
+                  </div>
                 </div>
               ) : mimusicaNotFound ? (
                 <div className="flex flex-col items-center justify-center text-center p-4 bg-amber-950/40 border border-amber-500/40 rounded-2xl space-y-3">
@@ -1201,7 +1312,19 @@ export function SphericalPlayer({
         )}
       </div>
 
-      {/* Modals: Invitar a un café & Privacidad */}
+      {/* Modals: Invitar a un café, Privacidad & Sincronización con Google Drive */}
+      <SyncProgressModal
+        isOpen={showSyncModal}
+        syncState={syncState}
+        onClose={() => {
+          setShowSyncModal(false);
+          driveService.clearCompletedSummary();
+        }}
+        onExploreMimusica={() => {
+          setInnerView('mimusica_selector');
+        }}
+      />
+
       <CoffeeModal
         isOpen={showCoffeeModal}
         onClose={() => setShowCoffeeModal(false)}

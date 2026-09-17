@@ -28,7 +28,7 @@ const CLIENT_ID_KEY = 'tesladrive_custom_client_id';
 
 // Primary provisioned client ID matching the applet Cloud Project
 const DEFAULT_CLIENT_ID =
-  firebaseConfig.oAuthClientId ||
+  (firebaseConfig as any).oAuthClientId ||
   ((import.meta as any).env?.VITE_GOOGLE_CLIENT_ID as string) ||
   '1094273500016-jj1hfi1cv2p7ihqsvakmprpevd38ldau.apps.googleusercontent.com';
 
@@ -126,7 +126,7 @@ class AuthService {
   public getClientId(): string {
     const custom = localStorage.getItem(CLIENT_ID_KEY);
     if (custom) return custom;
-    if (firebaseConfig.oAuthClientId) return firebaseConfig.oAuthClientId;
+    if ((firebaseConfig as any).oAuthClientId) return (firebaseConfig as any).oAuthClientId;
     return ((import.meta as any).env?.VITE_GOOGLE_CLIENT_ID as string) || DEFAULT_CLIENT_ID;
   }
 

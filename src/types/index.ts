@@ -31,6 +31,22 @@ export interface AudioTrack {
   lastPlayedAt?: number;
 }
 
+export interface SyncProgressState {
+  isSyncing: boolean;
+  percent: number; // 0 - 100
+  step: string;
+  currentFile: number;
+  totalFiles: number;
+  currentFileName?: string;
+  stage: 'idle' | 'searching_folder' | 'discovering_subfolders' | 'scanning_files' | 'processing_tracks' | 'saving_local' | 'completed' | 'error';
+  completedSummary?: {
+    totalTracks: number;
+    totalFolders: number;
+    timestamp: number;
+  } | null;
+  error?: string | null;
+}
+
 export interface CloudUserSession {
   provider: CloudProviderType;
   email: string;
