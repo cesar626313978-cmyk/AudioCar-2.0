@@ -260,10 +260,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 </div>
                 <button
                   onClick={() => onRefreshDrive()}
-                  className="mt-2 hitbox-48 px-6 py-2.5 rounded-full bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors shadow-lg cursor-pointer inline-flex items-center gap-2"
+                  className={`mt-2 hitbox-48 px-6 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer inline-flex items-center gap-2 ${
+                    authService.getUser()
+                      ? 'bg-white text-black hover:bg-neutral-200'
+                      : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white border border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                  }`}
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                  <span>{authService.getUser() ? 'Sincronizar Ahora' : 'Conectar y Sincronizar'}</span>
+                  <span>{authService.getUser() ? 'Sincronizar Ahora' : 'Conectar Google Drive'}</span>
                 </button>
               </div>
             ) : (

@@ -34,10 +34,16 @@ export function App() {
       if (authUser) {
         // Auto-refresh tracks when logged in
         refreshDriveTracks();
+      } else {
+        // Disconnected from Drive: ensure no leftover Drive tracks remain from previous sessions
+        await dbService.clearDriveTracks();
+        setTracks([]);
+        setFolders([]);
+        audioEngine.clearQueue();
       }
     });
 
-    // 3. Load initial local cache / demo tracks
+    // 3. Load initial local cache / demo tracks only if connected
     loadInitialMusic();
 
     // 4. Initialize Google Identity Services token client
@@ -51,25 +57,26 @@ export function App() {
 
   const loadInitialMusic = async () => {
     try {
-      const cached = await dbService.getAllTracks();
-      if (cached && cached.length > 0) {
-        setTracks(cached);
-        if (audioEngine.getState().queue.length === 0) {
-          audioEngine.setQueue(cached, 0, false);
+      const isConnected = !!authService.getAccessToken();
+      if (isConnected) {
+        const cached = await dbService.getAllTracks();
+        if (cached && cached.length > 0) {
+          setTracks(cached);
+          if (audioEngine.getState().queue.length === 0) {
+            audioEngine.setQueue(cached, 0, false);
+          }
         }
       } else {
-        // Default to high-fidelity demo tracks for instant experience
-        setTracks(DEMO_TRACKS);
-        if (audioEngine.getState().queue.length === 0) {
-          audioEngine.setQueue(DEMO_TRACKS, 0, false);
-        }
+        // Disconnected from Drive: ensure no leftover Drive tracks from previous sessions
+        await dbService.clearDriveTracks();
+        setTracks([]);
+        setFolders([]);
+        audioEngine.clearQueue();
       }
     } catch (e) {
       console.warn('Error loading initial music cache:', e);
-      setTracks(DEMO_TRACKS);
-      if (audioEngine.getState().queue.length === 0) {
-        audioEngine.setQueue(DEMO_TRACKS, 0, false);
-      }
+      setTracks([]);
+      audioEngine.clearQueue();
     }
   };
 

@@ -131,6 +131,14 @@ class AudioEngine implements AudioSeekEngine {
       const saved = JSON.parse(raw);
       if (!saved || !saved.queue || saved.queue.length === 0) return;
 
+      // When disconnected from Drive, do not load Drive tracks from previous sessions
+      const hasDriveTracks = saved.queue.some((t: AudioTrack) => t.source === 'drive' || (!t.source && !!t.driveFileId) || (!t.source && !!t.cloudFileId));
+      const hasDriveToken = !!authService.getAccessToken();
+      if (hasDriveTracks && !hasDriveToken) {
+        localStorage.removeItem('audiocar_session_state');
+        return;
+      }
+
       this.state.queue = saved.queue;
       this.originalQueueOrder = [...saved.queue];
       this.state.currentTrackIndex = Math.max(0, Math.min(saved.currentTrackIndex || 0, saved.queue.length - 1));
@@ -701,8 +709,30 @@ class AudioEngine implements AudioSeekEngine {
     return dataArray;
   }
 
+  public clearQueue() {
+    this.pause();
+    this.state.queue = [];
+    this.originalQueueOrder = [];
+    this.state.currentTrackIndex = -1;
+    this.state.isPlaying = false;
+    this.state.currentTime = 0;
+    this.state.duration = 0;
+    this.state.error = null;
+    this.audioA.removeAttribute('src');
+    this.audioB.removeAttribute('src');
+    this.audioA.load();
+    this.audioB.load();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('audiocar_session_state');
+    }
+    this.notifyListeners();
+  }
+
   public async setQueue(tracks: AudioTrack[], startIndex: number = 0, autoPlay: boolean = true) {
-    if (tracks.length === 0) return;
+    if (tracks.length === 0) {
+      this.clearQueue();
+      return;
+    }
 
     this.originalQueueOrder = [...tracks];
     this.state.queue = this.state.isShuffle ? this.shuffleArray([...tracks]) : [...tracks];

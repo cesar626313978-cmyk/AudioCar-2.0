@@ -25,15 +25,20 @@ import {
   Minus,
   ChevronRight,
   AlertCircle,
-  FolderOpen
+  FolderOpen,
+  Coffee,
+  ShieldCheck
 } from 'lucide-react';
 import { PlayerState, AudioTrack, DriveFolder, DriveAuthUser } from '../types';
 import { audioEngine } from '../services/audioEngine';
 import { authService } from '../services/authService';
+import { dbService } from '../services/dbService';
 import { driveService, MimusicaStructure } from '../services/driveService';
 import { subscribeWeather, requestAndFetchWeather, LocalWeather } from '../services/weatherService';
 import { DEMO_TRACKS } from '../data/demoTracks';
 import { EclipseNeonBorder } from './EclipseNeonBorder';
+import { CoffeeModal } from './CoffeeModal';
+import { PrivacyModal } from './PrivacyModal';
 
 interface SphericalPlayerProps {
   playerState: PlayerState;
@@ -69,6 +74,8 @@ export function SphericalPlayer({
   const [scrubTime, setScrubTime] = useState<number | null>(null);
   const [syncStatusText, setSyncStatusText] = useState<string>('');
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [showCoffeeModal, setShowCoffeeModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [localWeather, setLocalWeather] = useState<LocalWeather | null>(null);
 
   useEffect(() => {
@@ -447,17 +454,31 @@ export function SphericalPlayer({
             
             {/* 1. NORTHERN POLAR REGION: Quick-Touch Drive Status & Audio Format */}
             <div className="flex flex-col items-center gap-2 pt-2 sm:pt-4 w-full max-w-[340px]">
-              {/* Google Drive Status Button - Large Touch Target */}
+              {/* Google Drive Status Button - High-Visibility Contrast when Disconnected */}
               <button
                 id="btn-drive-status"
                 onClick={() => setInnerView('drive_menu')}
-                className="flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-full bg-cyan-950/70 hover:bg-cyan-900/80 active:scale-95 border-2 border-cyan-400/40 text-xs sm:text-sm font-semibold text-cyan-200 transition-all shadow-md backdrop-blur-md min-h-[44px]"
+                className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all backdrop-blur-md min-h-[44px] ${
+                  user
+                    ? 'bg-emerald-950/85 hover:bg-emerald-900/90 active:scale-95 border-2 border-emerald-400/70 text-xs sm:text-sm font-semibold text-emerald-200 shadow-[0_0_18px_rgba(52,211,153,0.35)]'
+                    : 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 active:scale-95 border-2 border-amber-200 text-xs sm:text-sm font-bold text-white shadow-[0_0_24px_rgba(245,158,11,0.65)] animate-pulse'
+                }`}
+                title={user ? `Conectado a Drive como ${user.name || user.email}` : 'Google Drive desconectado. Toca para conectar'}
               >
-                <HardDrive className="w-4 h-4 text-cyan-300 shrink-0" />
-                <span className="truncate max-w-[180px]">
+                <HardDrive className={`w-4 h-4 shrink-0 ${user ? 'text-emerald-300' : 'text-white'}`} />
+                <span className="truncate max-w-[160px]">
                   {user ? (user.name || user.email.split('@')[0]) : 'Conectar Drive'}
                 </span>
-                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${user ? 'bg-emerald-400 shadow-[0_0_10px_#34d399]' : 'bg-amber-400'}`} />
+                {user ? (
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/25 text-[10px] font-bold text-emerald-300 border border-emerald-400/40 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
+                    Conectado
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-black/40 text-[10px] uppercase font-black tracking-wider text-amber-200 border border-amber-300/50 shrink-0">
+                    Desconectado
+                  </span>
+                )}
               </button>
 
               {/* Active Folder Switcher Badge - In-Car Touch Friendly */}
@@ -521,17 +542,23 @@ export function SphericalPlayer({
               <h2 
                 id="track-title"
                 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight line-clamp-2 max-w-[280px] sm:max-w-[400px] drop-shadow-lg"
-                title={currentTrack?.title || 'Sin reproducción'}
+                title={currentTrack?.title || (user ? 'Sin canciones en cola' : 'Desconectado de Drive')}
               >
-                {currentTrack ? currentTrack.title : 'Esfera Terrestre'}
+                {currentTrack 
+                  ? currentTrack.title 
+                  : (user ? 'Sin canciones en cola' : 'Desconectado de Drive')}
               </h2>
 
-              {/* Artist / Album Name */}
+              {/* Artist / Album Name or Status Guidance */}
               <p 
                 id="track-artist"
-                className="text-sm sm:text-base text-cyan-300 font-semibold tracking-wide mt-1.5 truncate max-w-[280px] sm:max-w-[360px]"
+                className={`text-sm sm:text-base font-semibold tracking-wide mt-1.5 truncate max-w-[280px] sm:max-w-[360px] ${
+                  !user && !currentTrack ? 'text-amber-300' : 'text-cyan-300'
+                }`}
               >
-                {currentTrack ? currentTrack.artist : 'Google Drive Music'}
+                {currentTrack 
+                  ? currentTrack.artist 
+                  : (user ? 'Explora tus álbumes en /mimusica' : 'Pulsa el botón naranja "Conectar Drive"')}
               </p>
 
               {/* High-Visibility Tactile Playback Row (All inside equatorial max-width) */}
@@ -565,10 +592,28 @@ export function SphericalPlayer({
                 {/* Central Play/Pause - Massive Core Button */}
                 <button
                   id="btn-play-pause-main"
-                  onClick={() => audioEngine.togglePlay()}
+                  onClick={() => {
+                    if (!user && (!currentTrack || tracks.length === 0)) {
+                      setSyncStatusText('⚠️ Conecta Google Drive para reproducir');
+                      setTimeout(() => setSyncStatusText(''), 4000);
+                      setInnerView('drive_menu');
+                      return;
+                    }
+                    if (!currentTrack && tracks.length === 0) {
+                      setSyncStatusText('⚠️ Sin canciones: sincroniza /mimusica');
+                      setTimeout(() => setSyncStatusText(''), 3500);
+                      setInnerView('drive_menu');
+                      return;
+                    }
+                    audioEngine.togglePlay();
+                  }}
                   disabled={playerState.isLoading}
-                  className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-cyan-500/40 via-cyan-400/30 to-blue-600/50 hover:from-cyan-400/50 hover:to-blue-500/60 active:scale-95 border-3 border-cyan-300 shadow-[0_0_35px_rgba(6,182,212,0.55)] flex items-center justify-center text-white transition-all cursor-pointer shrink-0"
-                  title={playerState.isPlaying ? 'Pausar' : 'Reproducir'}
+                  className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-white transition-all cursor-pointer shrink-0 active:scale-95 ${
+                    !user && !currentTrack
+                      ? 'bg-gradient-to-br from-amber-500/50 via-orange-500/40 to-amber-700/60 hover:from-amber-400/60 hover:to-orange-500/70 border-3 border-amber-300 shadow-[0_0_35px_rgba(245,158,11,0.55)]'
+                      : 'bg-gradient-to-br from-cyan-500/40 via-cyan-400/30 to-blue-600/50 hover:from-cyan-400/50 hover:to-blue-500/60 border-3 border-cyan-300 shadow-[0_0_35px_rgba(6,182,212,0.55)]'
+                  }`}
+                  title={playerState.isPlaying ? 'Pausar' : (!user && !currentTrack ? 'Conectar Google Drive' : 'Reproducir')}
                   aria-label={playerState.isPlaying ? 'Pausar' : 'Reproducir'}
                 >
                   {playerState.isLoading ? (
@@ -620,8 +665,31 @@ export function SphericalPlayer({
             </div>
 
             {/* 3. SOUTHERN POLAR REGION: Tactile Volume & In-Sphere Playlist Button (Safely Contained) */}
-            <div className="flex flex-col items-center gap-2.5 pb-5 sm:pb-7 md:pb-8 w-full max-w-[270px] sm:max-w-[320px]">
+            <div className="flex flex-col items-center gap-2 pb-5 sm:pb-7 md:pb-8 w-full max-w-[270px] sm:max-w-[320px]">
               
+              {/* Options above Volume: Invitar a un café & Privacidad */}
+              <div className="flex items-center justify-center gap-2 w-full">
+                <button
+                  id="btn-coffee-modal"
+                  onClick={() => setShowCoffeeModal(true)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-amber-950/70 hover:bg-amber-900/90 active:scale-95 border border-amber-500/40 text-amber-200 hover:text-amber-100 text-[11px] sm:text-xs font-semibold transition-all shadow-sm backdrop-blur-md"
+                  title="Invitar a un café (Revolut / Bizum)"
+                >
+                  <Coffee className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Invitar a un café</span>
+                </button>
+
+                <button
+                  id="btn-privacy-modal"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 hover:bg-slate-800 active:scale-95 border border-slate-700/60 text-slate-300 hover:text-white text-[11px] sm:text-xs font-semibold transition-all shadow-sm backdrop-blur-md"
+                  title="Privacidad y protección de datos"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                  <span>Privacidad</span>
+                </button>
+              </div>
+
               {/* Tactile Volume Control with Step Buttons - Contained Width */}
               <div className="flex items-center justify-between gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/85 border border-cyan-500/35 text-sm shadow-md w-full">
                 {/* Mute / Unmute Button */}
@@ -883,9 +951,13 @@ export function SphericalPlayer({
                     <button
                       onClick={async () => {
                         await authService.signOut();
+                        await dbService.clearDriveTracks();
+                        onTracksChange([]);
+                        onFoldersChange([]);
+                        audioEngine.clearQueue();
                         setInnerView('player');
                       }}
-                      className="w-full text-xs text-rose-400 hover:underline pt-1 py-1"
+                      className="w-full text-xs text-rose-400 hover:text-rose-300 hover:underline pt-1 py-1 font-semibold"
                     >
                       Cerrar sesión de Drive
                     </button>
@@ -893,8 +965,12 @@ export function SphericalPlayer({
                 </>
               ) : (
                 <>
-                  <div>
-                    <h3 className="text-base font-bold text-white">Google Drive</h3>
+                  <div className="flex flex-col items-center">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[11px] font-extrabold uppercase tracking-wider mb-2">
+                      <HardDrive className="w-3.5 h-3.5" />
+                      Estado: Desconectado
+                    </span>
+                    <h3 className="text-base font-bold text-white">Conectar Google Drive</h3>
                     <p className="text-xs text-slate-300 mt-1 max-w-[260px]">
                       Conéctate para reproducir tus canciones desde la carpeta <strong className="text-cyan-300">/mimusica</strong> de tu Drive.
                     </p>
@@ -906,7 +982,7 @@ export function SphericalPlayer({
                       id="btn-google-drive-login"
                       onClick={handleGoogleSignIn}
                       disabled={isLoadingDrive}
-                      className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-white hover:bg-slate-100 active:scale-95 text-slate-900 text-xs sm:text-sm font-bold shadow-lg transition-transform min-h-[48px]"
+                      className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-full bg-white hover:bg-slate-100 active:scale-95 text-slate-900 text-xs sm:text-sm font-bold shadow-[0_0_20px_rgba(255,255,255,0.35)] transition-transform min-h-[48px]"
                     >
                       {isLoadingDrive ? (
                         <Loader2 className="w-5 h-5 animate-spin text-slate-800" />
@@ -1124,6 +1200,17 @@ export function SphericalPlayer({
           </div>
         )}
       </div>
+
+      {/* Modals: Invitar a un café & Privacidad */}
+      <CoffeeModal
+        isOpen={showCoffeeModal}
+        onClose={() => setShowCoffeeModal(false)}
+      />
+
+      <PrivacyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
     </div>
   );
 }

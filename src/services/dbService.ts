@@ -180,6 +180,27 @@ class IndexedDBService {
     });
   }
 
+  async clearDriveTracks(): Promise<void> {
+    const db = await this.getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['tracks', 'folders'], 'readwrite');
+      const trackStore = tx.objectStore('tracks');
+      const folderStore = tx.objectStore('folders');
+      const request = trackStore.getAll();
+      request.onsuccess = () => {
+        const allTracks: AudioTrack[] = request.result || [];
+        allTracks.forEach((t) => {
+          if (t.source === 'drive' || !t.id.startsWith('demo_')) {
+            trackStore.delete(t.id);
+          }
+        });
+        folderStore.clear();
+      };
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   async isDemoTracksHidden(): Promise<boolean> {
     return this.getSetting<boolean>('hideDemoTracks', false);
   }
