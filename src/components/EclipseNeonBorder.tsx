@@ -5,6 +5,11 @@ interface EclipseNeonBorderProps {
   isPlaying: boolean;
 }
 
+/**
+ * Solar Eclipse Corona with Flowing Plasma Light (Corona Solar con Luz en Movimiento)
+ * Completely eliminates rigid comb-like teeth/spikes, replacing them with continuous,
+ * organic coronal waves, revolving solar prominences, and an incandescent photosphere rim.
+ */
 export function EclipseNeonBorder({ isPlaying }: EclipseNeonBorderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -23,9 +28,13 @@ export function EclipseNeonBorder({ isPlaying }: EclipseNeonBorderProps) {
     let colorRotation = 0;
 
     const render = () => {
+      // Dynamic time advancement: lively and reactive when playing, serene and continuous when paused
       if (isPlaying) {
-        time += 0.025;
-        colorRotation += 0.01 + smoothIntensity * 0.04;
+        time += 0.02 + smoothIntensity * 0.025;
+        colorRotation += 0.008 + smoothIntensity * 0.02;
+      } else {
+        time += 0.008;
+        colorRotation += 0.003;
       }
 
       const width = canvas.width;
@@ -65,141 +74,256 @@ export function EclipseNeonBorder({ isPlaying }: EclipseNeonBorderProps) {
         }
       } catch {
         if (isPlaying) {
-          rawIntensity = 0.25;
-          rawBass = 0.3;
+          rawIntensity = 0.22;
+          rawBass = 0.28;
         }
       }
 
-      smoothIntensity += (rawIntensity - smoothIntensity) * 0.18;
-      smoothBass += (rawBass - smoothBass) * 0.22;
-      smoothTreble += (rawTreble - smoothTreble) * 0.25;
+      // Smooth interpolation for silky, fluid visual motion
+      smoothIntensity += (rawIntensity - smoothIntensity) * 0.15;
+      smoothBass += (rawBass - smoothBass) * 0.20;
+      smoothTreble += (rawTreble - smoothTreble) * 0.22;
 
       ctx.clearRect(0, 0, width, height);
 
+      // Solar color palette: cyan, electric blue, solar violet, and incandescent white
       const hueBase = (colorRotation * 60) % 360;
-      const primaryColor = `hsl(${hueBase}, 100%, ${55 + smoothIntensity * 20}%)`;
-      const secondaryColor = `hsl(${(hueBase + 75) % 360}, 95%, 60%)`;
-      const tertiaryColor = `hsl(${(hueBase + 160) % 360}, 100%, 65%)`;
+      const solarCyan = `hsla(${hueBase}, 95%, 62%, `;
+      const solarViolet = `hsla(${(hueBase + 60) % 360}, 90%, 58%, `;
+      const solarGold = `hsla(${(hueBase + 140) % 360}, 95%, 65%, `;
 
-      // 1. OUTER CORONA AURA
-      const outerGlowRadius = baseRadius * (1.15 + smoothBass * 0.3);
-      const outerGrad = ctx.createRadialGradient(centerX, centerY, baseRadius * 0.95, centerX, centerY, outerGlowRadius);
-      outerGrad.addColorStop(0, `hsla(${hueBase}, 100%, 60%, ${0.35 + smoothIntensity * 0.4})`);
-      outerGrad.addColorStop(0.5, `hsla(${(hueBase + 60) % 360}, 90%, 55%, ${0.18 + smoothBass * 0.25})`);
+      // =========================================================================
+      // 1. DEEP CORONAL AURA (Broad, soft celestial halo)
+      // =========================================================================
+      const outerGlowRadius = baseRadius * (1.25 + smoothBass * 0.28);
+      const outerGrad = ctx.createRadialGradient(
+        centerX,
+        centerY,
+        baseRadius * 0.94,
+        centerX,
+        centerY,
+        outerGlowRadius
+      );
+      outerGrad.addColorStop(0, `${solarCyan}${0.45 + smoothIntensity * 0.35})`);
+      outerGrad.addColorStop(0.35, `${solarViolet}${0.25 + smoothBass * 0.25})`);
+      outerGrad.addColorStop(0.7, `${solarGold}${0.10 + smoothTreble * 0.15})`);
       outerGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
+      ctx.save();
       ctx.fillStyle = outerGrad;
       ctx.beginPath();
       ctx.arc(centerX, centerY, outerGlowRadius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
 
-      // 2. CORONA STREAMERS
-      const rayCount = isPlaying ? 90 : 45; // fewer rays when paused for performance
-      const angleStep = (Math.PI * 2) / rayCount;
-
+      // =========================================================================
+      // 2. FLOWING ORGANIC CORONAL PLUMES (Continuous fluid waves, NO comb teeth)
+      // Multiple undulating, closed plasma envelopes that gently swirl and billow
+      // =========================================================================
       ctx.save();
-      for (let i = 0; i < rayCount; i++) {
-        const angle = i * angleStep + time * 0.2;
-        
-        let freqVal = 0;
-        if (freqBins && freqBins.length > 0 && isPlaying) {
-          const binIdx = Math.floor((i / rayCount) * (freqBins.length / 2));
-          freqVal = (freqBins[binIdx] || 0) / 255;
-        } else if (isPlaying) {
-          freqVal = 0.2 + 0.2 * Math.sin(i * 0.3 + time * 3);
-        }
+      ctx.globalCompositeOperation = 'screen';
 
-        const baseRayLen = 8 + smoothIntensity * 12;
-        const reactiveRayLen = freqVal * (25 + smoothBass * 45);
-        const noiseWobble = Math.sin(i * 7 + time * 4) * (3 + smoothTreble * 8);
-        const rayLength = isPlaying ? (baseRayLen + reactiveRayLen + noiseWobble) : 10;
+      const waveLayers = [
+        {
+          harmonicA: 3,
+          harmonicB: 5,
+          speedA: 0.7,
+          speedB: -1.1,
+          ampBase: 14 + smoothIntensity * 16,
+          bassBoost: smoothBass * 28,
+          color: solarCyan,
+          opacity: 0.38 + smoothIntensity * 0.32,
+        },
+        {
+          harmonicA: 4,
+          harmonicB: 7,
+          speedA: -0.9,
+          speedB: 1.4,
+          ampBase: 10 + smoothIntensity * 14,
+          bassBoost: smoothBass * 22,
+          color: solarViolet,
+          opacity: 0.32 + smoothBass * 0.28,
+        },
+        {
+          harmonicA: 2,
+          harmonicB: 6,
+          speedA: 0.5,
+          speedB: -0.8,
+          ampBase: 18 + smoothIntensity * 22,
+          bassBoost: smoothBass * 35,
+          color: solarGold,
+          opacity: 0.24 + smoothTreble * 0.25,
+        },
+      ];
 
-        const startX = centerX + Math.cos(angle) * (baseRadius - 2);
-        const startY = centerY + Math.sin(angle) * (baseRadius - 2);
-        const endX = centerX + Math.cos(angle) * (baseRadius + rayLength);
-        const endY = centerY + Math.sin(angle) * (baseRadius + rayLength);
-
-        const rayHue = (hueBase + (i / rayCount) * 120 + smoothIntensity * 50) % 360;
-        const rayAlpha = isPlaying ? Math.min(1, 0.25 + freqVal * 0.65 + smoothIntensity * 0.35) : 0.2;
-
-        ctx.strokeStyle = `hsla(${rayHue}, 100%, ${65 + freqVal * 25}%, ${rayAlpha})`;
-        ctx.lineWidth = 1.6 + smoothBass * 1.8;
-        ctx.lineCap = 'round';
+      waveLayers.forEach((layer) => {
+        const segments = 120; // Silky smooth circular polygon
+        const angleStep = (Math.PI * 2) / segments;
 
         ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-      }
+        for (let i = 0; i <= segments; i++) {
+          const a = i * angleStep;
+
+          // Organic celestial harmonic equation
+          const wave1 = Math.sin(a * layer.harmonicA + time * layer.speedA);
+          const wave2 = Math.cos(a * layer.harmonicB + time * layer.speedB);
+          const wave3 = Math.sin(a * 2 - time * 0.4) * 0.5;
+
+          const distortion = (wave1 * 0.55 + wave2 * 0.35 + wave3 * 0.1) * (layer.ampBase + layer.bassBoost);
+          const currentR = baseRadius + Math.max(0, distortion);
+
+          const px = centerX + Math.cos(a) * currentR;
+          const py = centerY + Math.sin(a) * currentR;
+
+          if (i === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+        }
+        ctx.closePath();
+
+        // Fluid gradient radiating from photosphere outward
+        const plumeGrad = ctx.createRadialGradient(
+          centerX,
+          centerY,
+          baseRadius * 0.98,
+          centerX,
+          centerY,
+          baseRadius + layer.ampBase + layer.bassBoost + 12
+        );
+        plumeGrad.addColorStop(0, `${layer.color}${layer.opacity})`);
+        plumeGrad.addColorStop(0.5, `${layer.color}${layer.opacity * 0.45})`);
+        plumeGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = plumeGrad;
+        ctx.fill();
+      });
       ctx.restore();
 
-      // 3. INNER NEON CORONA RIM
+      // =========================================================================
+      // 3. MOVING SOLAR PROMINENCES / REVOLVING LIGHT ARCS (Luz en movimiento)
+      // Luminous arcs that gracefully drift and orbit along the eclipse edge
+      // =========================================================================
       ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      const prominences = [
+        {
+          angle: time * 0.45,
+          span: 0.85,
+          width: 8 + smoothBass * 14,
+          glow: 26 + smoothBass * 20,
+          color: solarCyan,
+        },
+        {
+          angle: time * -0.32 + 2.4,
+          span: 0.65,
+          width: 6 + smoothTreble * 12,
+          glow: 22 + smoothTreble * 18,
+          color: solarViolet,
+        },
+        {
+          angle: time * 0.22 + 4.2,
+          span: 1.05,
+          width: 10 + smoothIntensity * 16,
+          glow: 30 + smoothIntensity * 24,
+          color: solarGold,
+        },
+      ];
+
+      prominences.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, baseRadius + p.width * 0.35, p.angle, p.angle + p.span);
+        ctx.strokeStyle = `${p.color}0.75)`;
+        ctx.lineWidth = p.width;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = `${p.color}1)`;
+        ctx.shadowBlur = p.glow;
+        ctx.stroke();
+      });
+      ctx.restore();
+
+      // =========================================================================
+      // 4. INCANDESCENT PHOTOSPHERE RIM (Crisp, blinding solar silhouette edge)
+      // =========================================================================
+      ctx.save();
+      // Outer neon rim
       ctx.beginPath();
       ctx.arc(centerX, centerY, baseRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = primaryColor;
-      ctx.lineWidth = 3 + smoothBass * 4;
-      ctx.shadowColor = secondaryColor;
-      ctx.shadowBlur = 18 + smoothBass * 28;
+      ctx.strokeStyle = `${solarCyan}0.95)`;
+      ctx.lineWidth = 3.2 + smoothBass * 3.8;
+      ctx.shadowColor = `${solarCyan}1)`;
+      ctx.shadowBlur = 18 + smoothBass * 22;
       ctx.stroke();
 
+      // Core white-hot razor edge
       ctx.beginPath();
-      ctx.arc(centerX, centerY, baseRadius + 1, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, baseRadius + 0.5, 0, Math.PI * 2);
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.2;
-      ctx.shadowColor = tertiaryColor;
-      ctx.shadowBlur = 8 + smoothTreble * 12;
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 10 + smoothTreble * 10;
       ctx.stroke();
       ctx.restore();
 
-      // 4. DIAMOND RING EFFECT
-      const diamondAngle = -Math.PI / 4 + Math.sin(time * 0.4) * 0.35;
+      // =========================================================================
+      // 5. DIAMOND RING EFFECT & SOLAR FLARE BURST (Anillo de Diamante)
+      // A brilliant focal flare that slowly glides around the eclipse circumference
+      // =========================================================================
+      const diamondAngle = -Math.PI / 4 + Math.sin(time * 0.35) * 0.5;
       const diamondX = centerX + Math.cos(diamondAngle) * baseRadius;
       const diamondY = centerY + Math.sin(diamondAngle) * baseRadius;
-      const diamondScale = 1 + smoothBass * 1.6 + smoothTreble * 0.8;
+      const diamondScale = 1 + smoothBass * 1.5 + smoothTreble * 0.8;
 
-      const diamondGlow = ctx.createRadialGradient(diamondX, diamondY, 1, diamondX, diamondY, 28 * diamondScale);
+      // Radiant point flare
+      const diamondGlow = ctx.createRadialGradient(
+        diamondX,
+        diamondY,
+        1,
+        diamondX,
+        diamondY,
+        34 * diamondScale
+      );
       diamondGlow.addColorStop(0, '#ffffff');
-      diamondGlow.addColorStop(0.2, primaryColor);
-      diamondGlow.addColorStop(0.6, `hsla(${hueBase}, 100%, 70%, 0.3)`);
+      diamondGlow.addColorStop(0.18, `${solarCyan}0.95)`);
+      diamondGlow.addColorStop(0.55, `${solarViolet}0.35)`);
       diamondGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
+      ctx.save();
       ctx.fillStyle = diamondGlow;
       ctx.beginPath();
-      ctx.arc(diamondX, diamondY, 28 * diamondScale, 0, Math.PI * 2);
+      ctx.arc(diamondX, diamondY, 34 * diamondScale, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.save();
+      // Anamorphic horizontal lens flare streak
       ctx.translate(diamondX, diamondY);
-      ctx.rotate(time * 0.5);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = primaryColor;
+      ctx.rotate(diamondAngle + Math.PI / 2);
+
+      const flareStreakLen = (28 + smoothIntensity * 36) * diamondScale;
+      const streakGrad = ctx.createLinearGradient(-flareStreakLen, 0, flareStreakLen, 0);
+      streakGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      streakGrad.addColorStop(0.5, '#ffffff');
+      streakGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.strokeStyle = streakGrad;
+      ctx.lineWidth = 2.2;
+      ctx.shadowColor = '#ffffff';
       ctx.shadowBlur = 12;
-
-      const starLen = (14 + smoothIntensity * 22) * diamondScale;
-
       ctx.beginPath();
-      ctx.moveTo(-starLen, 0);
-      ctx.lineTo(starLen, 0);
-      ctx.moveTo(0, -starLen);
-      ctx.lineTo(0, starLen);
-      ctx.moveTo(-starLen * 0.45, -starLen * 0.45);
-      ctx.lineTo(starLen * 0.45, starLen * 0.45);
-      ctx.moveTo(-starLen * 0.45, starLen * 0.45);
-      ctx.lineTo(starLen * 0.45, -starLen * 0.45);
+      ctx.moveTo(-flareStreakLen, 0);
+      ctx.lineTo(flareStreakLen, 0);
       ctx.stroke();
 
+      // Sparkling star center
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(0, 0, 2.5 * diamondScale, 0, Math.PI * 2);
+      ctx.arc(0, 0, 2.8 * diamondScale, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Only continue loop if playing
-      if (isPlaying) {
-        animationFrameId = requestAnimationFrame(render);
-      }
+      // Seamless continuous 60fps animation loop (always active so light stays in motion)
+      animationFrameId = requestAnimationFrame(render);
     };
 
     render();

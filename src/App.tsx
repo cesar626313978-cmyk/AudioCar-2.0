@@ -13,7 +13,6 @@ import { dbService } from './services/dbService';
 import { DEMO_TRACKS } from './data/demoTracks';
 import { SphericalPlayer } from './components/SphericalPlayer';
 import { SpaceBackground } from './components/SpaceBackground';
-import { UfoBanner } from './components/UfoBanner';
 
 export function App() {
   const [playerState, setPlayerState] = useState<PlayerState>(audioEngine.getState());
@@ -97,9 +96,6 @@ export function App() {
     >
       {/* Living Space Background with Drifting Stars, Distant Planets, Comets & Cosmic Clouds */}
       <SpaceBackground />
-
-      {/* Retro Sci-Fi UFO flying banner passing by occasionally */}
-      <UfoBanner />
 
       {/* Pure Central Focus: The Terrestrial Spherical Player with Eclipse Neon Corona */}
       <main className="relative z-10 flex flex-col items-center justify-center w-full h-full p-4 pointer-events-none">

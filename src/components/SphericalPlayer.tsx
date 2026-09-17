@@ -497,10 +497,9 @@ export function SphericalPlayer({
                       if (!localWeather?.isGps) {
                         requestAndFetchWeather();
                       }
-                      window.dispatchEvent(new CustomEvent('audiocar-launch-ufo', { detail: { category: 'weather' } }));
                     }}
                     className="flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-950/60 hover:bg-cyan-900/80 active:scale-95 border border-cyan-400/30 text-[10px] sm:text-[11px] font-mono text-cyan-200 transition-all shadow-sm backdrop-blur-md max-w-[180px] truncate"
-                    title="Toca para actualizar pronóstico o invocar el OVNI con el tiempo"
+                    title="Toca para actualizar pronóstico del tiempo"
                   >
                     <span>{localWeather ? localWeather.icon : '🌤️'}</span>
                     <span className="truncate font-semibold">
