@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidad y Protección de Datos - AudioCar</title>
+  <meta name="description" content="Política de privacidad, seguridad de datos, retención y eliminación de AudioCar según los requisitos de Google API Services User Data Policy.">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card-bg: #12121a;
+      --card-subtle: #1a1a24;
+      --border: #262636;
+      --border-accent: #38bdf8;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #34d399;
+      --code-bg: #050508;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px 36px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 12px;
+      }
+      .container {
+        padding: 28px 20px;
+      }
+    }
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 28px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #050508;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 8px 16px rgba(56, 189, 248, 0.25);
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .summary-card {
+      background: var(--card-subtle);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+    .summary-card h3 {
+      margin-top: 0;
+      color: #ffffff;
+      font-size: 16px;
+    }
+    .summary-card p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    h2 {
+      font-size: 20px;
+      color: #ffffff;
+      margin-top: 36px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+    }
+    h2 .en-title {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    h3 {
+      font-size: 16px;
+      color: var(--accent);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    p, li {
+      font-size: 15px;
+      color: #cbd5e1;
+    }
+    ul, ol {
+      padding-left: 22px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+    th {
+      background: var(--card-subtle);
+      color: #ffffff;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #cbd5e1;
+      vertical-align: top;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .callout {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .callout-success {
+      background: rgba(52, 211, 153, 0.08);
+      border-color: rgba(52, 211, 153, 0.25);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #ffffff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: #7dd3fc;
+    }
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">AC</div>
+      <div>
+        <h1>Política de Privacidad de AudioCar</h1>
+        <div class="subtitle">AudioCar Privacy Policy, Data Protection, Retention & Deletion Disclosures</div>
+        <div class="subtitle"><strong>Fecha de última actualización:</strong> 4 de septiembre de 2026</div>
+      </div>
+    </div>
+
+    <div class="badge">Google API Services User Data Policy Compliance</div>
+
+    <div class="summary-card">
+      <h3>Resumen Ejecutivo / Executive Summary</h3>
+      <p>
+        AudioCar es un reproductor multimedia web y Progressive Web App (PWA) de arquitectura cliente (Client-Side Only). <strong>No disponemos de servidores backend propios que almacenen, recopilen o compartan tus archivos ni tus datos de usuario de Google.</strong> Todo el streaming, procesamiento Web Audio y almacenamiento en caché de metadatos se ejecuta de forma local y cifrada en el navegador del dispositivo del usuario.
+      </p>
+    </div>
+
+    <h2>1. Información General del Servicio <span class="en-title">General Information</span></h2>
+    <p>
+      <strong>AudioCar</strong> (en adelante, "la Aplicación") es una aplicación web y PWA diseñada específicamente para pantallas táctiles de vehículos y dispositivos móviles. Su función principal es permitir al usuario explorar y reproducir en streaming sus propios archivos de audio almacenados en su cuenta personal de Google Drive (específicamente en el directorio designado <code>mimusica</code>).
+    </p>
+    <p>
+      <strong>Responsable del Tratamiento y Desarrollador:</strong><br>
+      Correo electrónico de contacto y privacidad: <a href="mailto:cesar626313978@gmail.com">cesar626313978@gmail.com</a>
+    </p>
+
+    <h2>2. Datos de Usuario de Google y Permisos Solicitados <span class="en-title">Google User Data & Scopes</span></h2>
+    <p>
+      AudioCar utiliza el protocolo estándar de autorización OAuth 2.0 de Google. Aplicando una estricta política de mínimo privilegio, <strong>AudioCar no solicita acceso global a tu unidad de Google Drive</strong>, sino únicamente acceso contextual a través de la API oficial Google Picker:
+    </p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Ámbito (Scope)</th>
+            <th>Categoría de Google</th>
+            <th>Finalidad Específica en AudioCar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>drive.file</code></td>
+            <td>Sensitive (Sensible - No Restringido)</td>
+            <td>Permite listar metadatos y obtener el flujo binario de audio <em>exclusivamente</em> de los archivos y carpetas de música que el usuario selecciona o crea explícitamente a través del diálogo oficial de Google Picker (por ejemplo, la carpeta <code>mimusica</code>). AudioCar no tiene acceso al resto de archivos o documentos de la cuenta.</td>
+          </tr>
+          <tr>
+            <td><code>drive.appdata</code></td>
+            <td>Non-sensitive / Drive AppData</td>
+            <td>Permite crear, leer y sincronizar las listas de reproducción personalizadas y preferencias de ecualización en la carpeta privada de datos de la aplicación dentro de la propia cuenta de Google Drive del usuario.</td>
+          </tr>
+          <tr>
+            <td><code>userinfo.email</code> / <code>userinfo.profile</code></td>
+            <td>Non-sensitive</td>
+            <td>Muestra en la interfaz del reproductor el avatar y correo electrónico del usuario conectado para confirmar la sesión activa.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>3. Mecanismos de Seguridad y Protección de Datos <span class="en-title">Data Protection & Security Mechanisms</span></h2>
+    <p>
+      Para salvaguardar la privacidad y la integridad de los datos sensibles y restringidos recibidos a través de las API de Google, AudioCar implementa rigurosas medidas de seguridad técnicas y organizativas:
+    </p>
+
+    <ul>
+      <li>
+        <strong>Cifrado de Datos en Tránsito (Encryption in Transit):</strong> Todas las comunicaciones entre la Aplicación y los servidores de Google (incluyendo el intercambio de tokens OAuth, llamadas REST a la API de Drive v3 y la descarga de transmisiones de audio) se realizan estrictamente a través de conexiones seguras y cifradas mediante protocolos criptográficos modernos <strong>HTTPS y Transport Layer Security (TLS 1.2 / TLS 1.3)</strong>. Queda totalmente bloqueada cualquier transmisión en texto plano.
+      </li>
+      <li>
+        <strong>Cifrado y Aislamiento en Reposo (Encryption at Rest & Sandboxing):</strong> La Aplicación no almacena datos en bases de datos remotas. El almacenamiento local de soporte (metadatos de canciones, carátulas y buffers temporales de reproducción en IndexedDB y Web Storage) reside exclusivamente en el dispositivo del usuario, protegido por el <strong>aislamiento estricto por origen del navegador (Same-Origin Policy y Sandboxing)</strong> y las protecciones criptográficas a nivel de sistema operativo y almacenamiento del dispositivo del usuario.
+      </li>
+      <li>
+        <strong>Arquitectura sin Servidores Intermediarios (Zero-Intermediary Architecture):</strong> AudioCar se ejecuta íntegramente como una aplicación cliente en el navegador. <strong>Ningún token de acceso, archivo multimedia, historial de reproducción ni dato personal pasa ni se almacena jamás en servidores externos o de terceros administrados por nosotros o por intermediarios.</strong> La comunicación es directa de extremo a extremo: Navegador del Usuario &harr; Google Cloud API.
+      </li>
+      <li>
+        <strong>Gestión Efímera de Tokens de Acceso:</strong> Los tokens de acceso OAuth 2.0 recibidos se custodian en la memoria volátil del proceso del navegador (RAM) y en almacenamiento de sesión aislado local. Nunca se exponen en URLs de registro ni se comparten con servicios de analítica de terceros.
+      </li>
+      <li>
+        <strong>Principio de Mínimo Privilegio:</strong> La aplicación opera bajo el principio de menor privilegio, limitando su consulta y lectura exclusivamente a carpetas y archivos con extensiones de audio compatibles (MP3, FLAC, M4A, WAV, OGG, AAC) y carátulas acompañantes.
+      </li>
+    </ul>
+
+    <h2>4. Periodos de Retención de Datos <span class="en-title">Data Retention Disclosures</span></h2>
+    <p>
+      AudioCar mantiene una política estricta de minimización y retención limitada de datos:
+    </p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo de Dato</th>
+            <th>Ubicación de Almacenamiento</th>
+            <th>Periodo Máximo de Retención</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tokens de Acceso OAuth 2.0</strong></td>
+            <td>Memoria volátil (RAM) / Storage local del navegador</td>
+            <td><strong>Efímero.</strong> Se destruyen inmediatamente al pulsar "Cerrar Sesión", al caducar el token (habitualmente 60 minutos) o al cerrar el navegador si no se mantiene sesión.</td>
+          </tr>
+          <tr>
+            <td><strong>Buffers de Audio en Memoria RAM</strong></td>
+            <td>Memoria volátil de la aplicación (Blob URLs)</td>
+            <td><strong>Máximo 2 pistas concurrentes.</strong> Se revocan explícitamente de la memoria RAM (<code>URL.revokeObjectURL</code>) inmediatamente tras completarse la transición de reproducción.</td>
+          </tr>
+          <tr>
+            <td><strong>Metadatos y Caché Local de Canciones</strong></td>
+            <td>IndexedDB del navegador (dispositivo local)</td>
+            <td><strong>Bajo control del usuario.</strong> Se conservan en el dispositivo local únicamente mientras el usuario mantenga instalada la aplicación o hasta que ejecute la limpieza de datos manual.</td>
+          </tr>
+          <tr>
+            <td><strong>Listas y Configuración en Drive AppData</strong></td>
+            <td>Espacio privado del usuario en su cuenta de Google Drive</td>
+            <td><strong>Bajo control del usuario.</strong> Permanece en su propia cuenta de Google hasta que el usuario decida borrar los datos de la aplicación en Google Drive.</td>
+          </tr>
+          <tr>
+            <td><strong>Servidores Externos o Nube de AudioCar</strong></td>
+            <td>Ninguna (No aplicable)</td>
+            <td><strong>0 días / No existe retención externa.</strong> AudioCar no posee servidores de recopilación de datos de usuario.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>5. Procedimientos de Eliminación de Datos <span class="en-title">Data Deletion Procedures</span></h2>
+    <p>
+      Garantizamos el derecho de los usuarios a eliminar de forma completa, inmediata e irreversible cualquier dato relacionado con el uso de AudioCar mediante los siguientes procedimientos:
+    </p>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Opción A: Eliminación Inmediata desde la Aplicación (Self-Service)</div>
+      <p style="margin: 0; font-size: 14px;">
+        El usuario puede purgar todos los datos locales en cualquier momento:
+      </p>
+      <ol style="margin-bottom: 0; margin-top: 8px;">
+        <li>Abre el panel de <strong>Configuración (Ajustes de Audio y Sistema)</strong> en AudioCar.</li>
+        <li>En la sección <em>Local Storage & IndexedDB</em>, pulsa el botón <strong>"Clear Cache" (Borrar Caché y Datos)</strong>. Esto ejecuta una eliminación atómica e irreversible de todas las bases de datos IndexedDB locales (metadatos, buffers binarios de audio, registros de reproducción y configuraciones).</li>
+        <li>Pulsa <strong>"Cerrar Sesión" (Sign Out)</strong> para purgar y destruir de inmediato todos los tokens de autenticación OAuth de la memoria del navegador.</li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Opción B: Eliminación de Datos de la Aplicación en Google Drive (AppData)</div>
+      <p style="margin: 0; font-size: 14px;">
+        Para eliminar los archivos de configuración o listas almacenados en la carpeta privada <code>drive.appdata</code> de tu cuenta Google:
+      </p>
+      <ol style="margin-bottom: 0; margin-top: 8px;">
+        <li>Accede a <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer">Google Drive</a> desde tu navegador.</li>
+        <li>Haz clic en el icono de la rueda dentada (<strong>Configuración</strong>) en la esquina superior derecha y selecciona <strong>Configuración</strong>.</li>
+        <li>Ve a la pestaña <strong>Administrar aplicaciones</strong>.</li>
+        <li>Localiza <strong>AudioCar</strong>, haz clic en el botón <strong>Opciones</strong> y selecciona <strong>Eliminar datos de aplicación ocultos</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Opción C: Revocación Total de Accesos en la Cuenta de Google</div>
+      <p style="margin: 0; font-size: 14px;">
+        El usuario puede desconectar y revocar los permisos de AudioCar en cualquier momento con efecto instantáneo:
+      </p>
+      <ol style="margin-bottom: 0; margin-top: 8px;">
+        <li>Visita la página de seguridad de tu cuenta de Google: <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">https://myaccount.google.com/permissions</a>.</li>
+        <li>En la sección de <em>Aplicaciones de terceros con acceso a la cuenta</em>, selecciona <strong>AudioCar</strong>.</li>
+        <li>Haz clic en <strong>Quitar acceso</strong> (o Revocar permiso). Al hacerlo, todos los tokens pierden validez de inmediato y Google bloqueará cualquier acceso posterior.</li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Opción D: Solicitud de Supresión y Asistencia por Correo Electrónico</div>
+      <p style="margin: 0; font-size: 14px;">
+        Si deseas asistencia personalizada o verificación sobre la eliminación total de tus datos, puedes enviar un correo electrónico con el asunto <em>"Solicitud de Eliminación de Datos / Data Deletion Request"</em> a: <a href="mailto:cesar626313978@gmail.com">cesar626313978@gmail.com</a>. Atenderemos y confirmaremos tu solicitud en un plazo máximo de <strong>48 horas laborables</strong>.
+      </p>
+    </div>
+
+    <h2>6. Cumplimiento de la Política de Datos de Usuario de Google API Services <span class="en-title">Google Limited Use Disclosure</span></h2>
+    <p>
+      El uso y la transferencia que realice AudioCar a cualquier otra aplicación de la información recibida a través de las API de Google se ajustarán en todo momento a la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Política de Datos del Usuario de los Servicios de API de Google</a>, incluidos los requisitos de <strong>Uso Limitado (Limited Use Requirements)</strong>:
+    </p>
+    <ul>
+      <li>No transferimos ni divulgamos datos de usuario de Google a terceros, excepto cuando sea estrictamente necesario para proporcionar o mejorar las funciones de reproducción solicitadas por el usuario, cumplir la legislación aplicable o en el marco de una reestructuración empresarial debidamente informada.</li>
+      <li>No utilizamos ni transferimos datos de usuario de Google con fines publicitarios, creación de perfiles de marketing ni intermediación de datos.</li>
+      <li>No permitimos que personas humanas lean los datos del usuario, a menos que contemos con el consentimiento afirmativo previo del usuario para resolver un problema de soporte técnico específico, sea necesario por razones de seguridad (prevención de abusos) o por imperativo legal.</li>
+    </ul>
+
+    <h2>7. Derechos del Usuario (ARCO / RGPD / CCPA) <span class="en-title">User Rights</span></h2>
+    <p>
+      De conformidad con el Reglamento General de Protección de Datos (RGPD) de la Unión Europea y demás legislaciones aplicables, los usuarios tienen derecho de acceso, rectificación, supresión (derecho al olvido), limitación del tratamiento, portabilidad y oposición sobre sus datos. Debido a la arquitectura de AudioCar, ningún dato personal o archivo reside en servidores nuestros; todos los derechos pueden ejercerse de forma inmediata mediante las opciones de autodestrucción de caché y revocación detalladas en la Sección 5.
+    </p>
+
+    <h2>8. Contacto del Delegado de Privacidad <span class="en-title">Contact Information</span></h2>
+    <p>
+      Para cualquier duda técnica, aclaración sobre el tratamiento de datos o consultas respecto a esta Política de Privacidad, puedes ponerte en contacto directo con:
+    </p>
+    <p>
+      <strong>Desarrollador Responsable:</strong> César<br>
+      <strong>Correo Electrónico:</strong> <a href="mailto:cesar626313978@gmail.com">cesar626313978@gmail.com</a><br>
+      <strong>Aplicación:</strong> AudioCar (Web / PWA)
+    </p>
+
+    <div class="footer">
+      © 2026 AudioCar. Todos los derechos reservados. | Diseñado para reproducción de audio segura en vehículos.
+    </div>
+  </div>
+</body>
+</html>

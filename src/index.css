@@ -1,0 +1,429 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --theme-bg-base: #000000;
+    --theme-bg-surface: #0a0a0a;
+    --theme-bg-elevated: #121212;
+    --theme-bg-card: #171717;
+    --theme-bg-hover: #262626;
+    --theme-border: #262626;
+    --theme-border-subtle: #1c1c1c;
+    --theme-text-primary: #ffffff;
+    --theme-text-secondary: #a3a3a3;
+    --theme-text-muted: #737373;
+    --theme-accent: #ffffff;
+    --theme-accent-contrast: #000000;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+  }
+
+  button, [role="button"], a {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* -------------------------------------------------------------
+   LIGHT THEME (Day Cockpit Mode - High-End Minimalist Studio)
+   Clean, glare-free, matte automotive day palette with crisp typography
+   ------------------------------------------------------------- */
+.theme-light {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.theme-light header {
+  background-color: #ffffff !important;
+  border-bottom-color: #e5e7eb !important;
+}
+
+/* Background conversions */
+.theme-light .bg-black,
+.theme-light .bg-\[\#000000\],
+.theme-light .bg-\[\#0a0a0a\],
+.theme-light .bg-\[\#070707\] {
+  background-color: #f3f4f6 !important;
+}
+
+.theme-light .bg-\[\#101010\],
+.theme-light .bg-\[\#141414\],
+.theme-light .bg-\[\#171717\],
+.theme-light .bg-\[\#121212\],
+.theme-light .bg-\[\#0c0c0c\],
+.theme-light .bg-\[\#0d0d0d\],
+.theme-light .bg-\[\#0e0e0e\] {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+.theme-light .bg-neutral-900,
+.theme-light .bg-neutral-950,
+.theme-light .bg-\[\#0f0f0f\] {
+  background-color: #f9fafb !important;
+  color: #1f2937 !important;
+}
+
+.theme-light .bg-neutral-900\/90,
+.theme-light .bg-neutral-900\/80,
+.theme-light .bg-neutral-900\/60,
+.theme-light .bg-black\/60,
+.theme-light .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #e5e7eb !important;
+}
+
+.theme-light .hover\:bg-neutral-800:hover,
+.theme-light .hover\:bg-neutral-900:hover,
+.theme-light .hover\:bg-\[\#161616\]:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Form input styling in light mode */
+.theme-light input[type="text"],
+.theme-light input[type="email"],
+.theme-light textarea {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.theme-light input[type="text"]::placeholder,
+.theme-light input[type="email"]::placeholder,
+.theme-light textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+.theme-light input[type="text"]:focus,
+.theme-light input[type="email"]:focus,
+.theme-light textarea:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Modals & Dialogs in Light Mode */
+.theme-light .fixed.inset-0.bg-black\/85,
+.theme-light .fixed.inset-0.bg-black\/70,
+.theme-light .fixed.inset-0.bg-black\/80 {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Border conversions */
+.theme-light .border-neutral-800,
+.theme-light .border-neutral-800\/90,
+.theme-light .border-neutral-800\/80,
+.theme-light .border-neutral-800\/70,
+.theme-light .border-neutral-800\/60,
+.theme-light .border-neutral-700,
+.theme-light .border-neutral-700\/80 {
+  border-color: #e5e7eb !important;
+}
+
+/* Typography conversions */
+.theme-light .text-white {
+  color: #111827 !important;
+}
+
+.theme-light .text-neutral-200 {
+  color: #1f2937 !important;
+}
+
+.theme-light .text-neutral-300,
+.theme-light .text-neutral-400 {
+  color: #4b5563 !important;
+}
+
+.theme-light .text-neutral-500,
+.theme-light .text-neutral-600 {
+  color: #6b7280 !important;
+}
+
+.theme-light .fill-black {
+  fill: #ffffff !important;
+}
+
+/* Active buttons and pills in light mode */
+.theme-light .bg-white.text-black {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+  border-color: #111827 !important;
+}
+
+.theme-light .bg-white.text-black .fill-black {
+  fill: #ffffff !important;
+}
+
+.theme-light .bg-white.text-black svg {
+  color: #ffffff !important;
+}
+
+/* Inactive button pills */
+.theme-light .bg-neutral-900.text-neutral-400,
+.theme-light .bg-neutral-900.text-neutral-300 {
+  background-color: #ffffff !important;
+  color: #4b5563 !important;
+  border-color: #e5e7eb !important;
+}
+
+.theme-light .bg-neutral-900.text-neutral-400:hover,
+.theme-light .bg-neutral-900.text-neutral-300:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+/* Primary round Play button in light mode */
+.theme-light .hitbox-64.bg-white {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.25) !important;
+}
+
+.theme-light .hitbox-64.bg-white:hover {
+  background-color: #1f2937 !important;
+}
+
+.theme-light .hitbox-64.bg-white svg,
+.theme-light .hitbox-64.bg-white .fill-black {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Track list item in active playing state */
+.theme-light .bg-white\/10 {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+.theme-light .bg-white\/10 .animate-ping {
+  background-color: #2563eb !important;
+}
+
+/* MiniPlayer dock & Header in light mode */
+.theme-light .border-t.border-neutral-800 {
+  border-top-color: #e5e7eb !important;
+}
+
+/* Range Sliders in Light Mode */
+.theme-light input[type="range"].automotive-slider::-webkit-slider-thumb {
+  background: #111827 !important;
+  border: 3px solid #ffffff !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.theme-light input[type="range"].automotive-slider::-webkit-slider-runnable-track {
+  background: #e5e7eb !important;
+}
+
+.theme-light .bg-white.rounded-full {
+  background-color: #111827 !important;
+}
+
+/* Custom Scrollbar for Light Mode */
+.theme-light ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Custom Sophisticated Dark Automotive Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Smooth range slider for Sophisticated Dark automotive scrubber */
+input[type="range"].automotive-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].automotive-slider:focus {
+  outline: none;
+}
+
+input[type="range"].automotive-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #0a0a0a;
+  box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 2px 8px rgba(255,255,255,0.25);
+  margin-top: -8px;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"].automotive-slider:active::-webkit-slider-thumb {
+  transform: scale(1.25);
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(255,255,255,0.6);
+}
+
+input[type="range"].automotive-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #262626;
+  border-radius: 9999px;
+}
+
+/* Hitbox minimum guarantee 48px */
+.hitbox-48 {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hitbox-56 {
+  min-width: 56px;
+  min-height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hitbox-64 {
+  min-width: 64px;
+  min-height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* -------------------------------------------------------------
+   AMBIENT COCKPIT LED STRIP SYSTEM
+   ------------------------------------------------------------- */
+@keyframes led-pulse-glow {
+  0%, 100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 10px var(--led-color, #E82127)) drop-shadow(0 0 25px var(--led-color, #E82127));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 16px var(--led-color, #E82127)) drop-shadow(0 0 45px var(--led-color, #E82127));
+  }
+}
+
+@keyframes led-rainbow-rotate {
+  0% {
+    filter: hue-rotate(0deg) drop-shadow(0 0 12px #ff0055);
+  }
+  50% {
+    filter: hue-rotate(180deg) drop-shadow(0 0 16px #00f0ff);
+  }
+  100% {
+    filter: hue-rotate(360deg) drop-shadow(0 0 12px #ff0055);
+  }
+}
+
+.animate-led-pulse {
+  animation: led-pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-led-rainbow {
+  animation: led-rainbow-rotate 8s linear infinite;
+}
+
+/* Glass-etched neon LED frame */
+.car-led-frame {
+  position: relative;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.car-led-frame::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--led-border-gradient, linear-gradient(135deg, rgba(232,33,39,0.8), rgba(232,33,39,0.2) 60%, rgba(232,33,39,0.8)));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 20;
+  transition: background 0.4s ease, opacity 0.4s ease;
+}
+
+.car-led-glow {
+  box-shadow: 
+    0 0 1px 1px var(--led-color-subtle, rgba(232, 33, 39, 0.4)),
+    0 0 25px -4px var(--led-color-glow, rgba(232, 33, 39, 0.35)),
+    0 0 50px -10px var(--led-color-ambient, rgba(232, 33, 39, 0.2)),
+    inset 0 0 20px -8px var(--led-color-ambient, rgba(232, 33, 39, 0.15)) !important;
+}
+
+/* Realistic Vinyl Record Animations & Textures */
+@keyframes vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-vinyl-spin {
+  animation: vinyl-spin 7s linear infinite;
+}
+
+.vinyl-grooves-pattern {
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    #0a0b0d 0px,
+    #18191f 1px,
+    #0c0d10 2px,
+    #131418 3px
+  );
+}
+
+.vinyl-sheen-overlay {
+  background: conic-gradient(
+    from 45deg at 50% 50%,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.08) 25deg,
+    transparent 50deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.08) 205deg,
+    transparent 230deg,
+    transparent 360deg
+  );
+}
+
+
+

@@ -1,0 +1,10 @@
+{
+  "name": "Audio-car 2.0",
+  "description": "High-contrast automotive touchscreen music player \u0026 PWA streaming directly from Google Drive, optimized for Tesla Model 3 15.4\" 1920x1200 infotainment screens with MediaSession and offline caching.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

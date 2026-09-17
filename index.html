@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="google-site-verification" content="ZjSzaznKeL3zjg0FeeTl3TvNsASfbQOWpKJnLVAVzLk" />
+    <title>AudioCar - Reproductor Esférico Google Drive</title>
+    <meta name="description" content="Reproductor de música esférico y minimalista inspirado en la esfera terrestre con reproducción de alta fidelidad desde Google Drive y controles integrados dentro del círculo." />
+    
+    <!-- PWA & Mobile Web App -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AudioCar" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Google Identity Services (GIS) & Google API Client (Picker) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    
+    <!-- Google Fonts for Automotive Screen Legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-black text-white antialiased select-none touch-manipulation overflow-x-hidden font-sans">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

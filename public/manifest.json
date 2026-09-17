@@ -1,0 +1,26 @@
+{
+  "name": "AudioCar Cloud Player",
+  "short_name": "AudioCar",
+  "description": "In-Car Google Drive Cloud Music Streaming PWA for Automotive Touchscreens and Desktop",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/audiocar-logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/audiocar-logo.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "audio"]
+}

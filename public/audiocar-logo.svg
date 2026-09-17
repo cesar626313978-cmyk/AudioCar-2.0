@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Cyan to Violet Gradient for Speedometer Arc -->
+    <linearGradient id="speedoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="45%" stop-color="#6366f1" />
+      <stop offset="80%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Center Equalizer Gradient -->
+    <linearGradient id="eqGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Dark Cockpit Radial Background -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#18181f" />
+      <stop offset="50%" stop-color="#0d0d12" />
+      <stop offset="100%" stop-color="#050508" />
+    </radialGradient>
+
+    <!-- Outer Squircle Shadow -->
+    <filter id="iconShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+
+    <!-- Speedometer Glow Filter -->
+    <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with Soft Dark Bezel -->
+  <rect x="16" y="16" width="480" height="480" rx="120" fill="url(#bgGrad)" stroke="#272732" stroke-width="4" filter="url(#iconShadow)" />
+
+  <!-- Concentric Dial Rings (Radar / Instrument Cluster) -->
+  <circle cx="256" cy="245" r="190" fill="none" stroke="#1f2230" stroke-width="1.5" />
+  <circle cx="256" cy="245" r="160" fill="none" stroke="#1b1e2a" stroke-width="2" />
+  <circle cx="256" cy="245" r="130" fill="none" stroke="#222536" stroke-width="1.5" />
+  <circle cx="256" cy="245" r="85" fill="none" stroke="#282d42" stroke-width="3" />
+
+  <!-- Instrument Tick Marks -->
+  <line x1="256" y1="125" x2="256" y2="145" stroke="#818cf8" stroke-width="4" stroke-linecap="round" />
+  <line x1="175" y1="205" x2="192" y2="212" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" />
+  <line x1="337" y1="205" x2="320" y2="212" stroke="#c084fc" stroke-width="4" stroke-linecap="round" />
+  <line x1="148" y1="305" x2="162" y2="293" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" />
+  <line x1="364" y1="305" x2="350" y2="293" stroke="#c084fc" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Outer Luminous Speedometer Arc (260 deg) -->
+  <path
+    d="M 125 342 A 160 160 0 1 1 387 342"
+    fill="none"
+    stroke="url(#speedoGrad)"
+    stroke-width="16"
+    stroke-linecap="round"
+    filter="url(#arcGlow)"
+  />
+
+  <!-- Center Futuristic Emblem: "A" + Audio Wave Bars -->
+  <g transform="translate(0, 5)">
+    <!-- Stylized Chevron / A Frame -->
+    <path
+      d="M 210 275 L 256 186 L 302 275"
+      fill="none"
+      stroke="#7dd3fc"
+      stroke-width="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Equalizer Spectrum Bars Inside A -->
+    <line x1="236" y1="267" x2="236" y2="252" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" />
+    <line x1="246" y1="267" x2="246" y2="236" stroke="#60a5fa" stroke-width="4.5" stroke-linecap="round" />
+    <line x1="256" y1="267" x2="256" y2="225" stroke="#a855f7" stroke-width="4.5" stroke-linecap="round" />
+    <line x1="266" y1="267" x2="266" y2="236" stroke="#c084fc" stroke-width="4.5" stroke-linecap="round" />
+    <line x1="276" y1="267" x2="276" y2="252" stroke="#e879f9" stroke-width="4.5" stroke-linecap="round" />
+
+    <!-- Center Accent Dot -->
+    <circle cx="256" cy="250" r="8" fill="#ffffff" filter="drop-shadow(0 0 6px #ffffff)" />
+  </g>
+
+  <!-- Typography: AUDIOCAR -->
+  <text
+    x="256"
+    y="420"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="34"
+    font-weight="900"
+    letter-spacing="10"
+    fill="#ffffff"
+  >
+    AUDIOCAR
+  </text>
+
+  <!-- Subtitle: CLOUD AUDIO SYSTEM -->
+  <text
+    x="256"
+    y="448"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="14"
+    font-weight="700"
+    letter-spacing="5"
+    fill="#818cf8"
+  >
+    CLOUD AUDIO SYSTEM
+  </text>
+</svg>
